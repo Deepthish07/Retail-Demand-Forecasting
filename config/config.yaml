@@ -1,0 +1,15 @@
+project_name: Retail Demand Forecasting
+target_column: qty
+aggregation_level:
+  - date
+  - store
+  - style
+  - color
+  - size
+train_ratio: 0.8
+random_state: 42
+model:
+    algorithm: catboost
+  save_model: true
+  processed_data_path: data/processed/
+  prediction_path: data/predictions/

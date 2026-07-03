@@ -1,0 +1,132 @@
+date:
+  required: true
+  alias:
+    - Inv Date
+    - Invoice Date
+    - Invoice_Date
+    - Date
+    - Sales Date
+    - Billing Date
+    - Order date
+    - Transaction Date
+    - InvoiceDate
+    - Invoice Date (MM/DD/YYYY)
+    - Invoice Date (YYYY-MM-DD)
+    - Invoice Date (DD/MM/YYYY)
+    - Invoice Date (DD-MM-YYYY)
+    - Invoice Date (MM-DD-YYYY)
+    - Invoice Date (YYYY/MM/DD)
+    - Invoice Date (YYYY/MM/DD HH:MM:SS)
+    - Invoice Date (MM/DD/YYYY HH:MM:SS)
+    - Invoice Date (DD/MM/YYYY HH:MM:SS)
+    - Invoice Date (DD-MM-YYYY HH:MM:SS)
+    - Invoice Date (MM-DD-YYYY HH:MM:SS)
+    - Invoice Date (YYYY-MM-DD HH:MM:SS)
+store:
+  required: true
+  alias:
+    - Store
+    - Store Name
+    - Store_Name
+    - Store ID
+    - Store_ID
+    - Location
+    - Location Name
+    - Location_Name
+    - Outlet
+    - Branch
+    - Shop
+style:
+  required: true
+  alias:
+    - Style
+    - Style Number
+    - Style_Number
+    - Style No
+    - Style_No
+    - Item Code
+    - Item_Code
+    - Product Code
+    - Product_Code
+    - SKU
+    - SKU Code
+category:
+  required: true
+  alias:
+    - Category
+    - Category Name
+    - Category_Name
+    - Product Category
+    - Product_Category
+    - Item Category
+    - Item_Category
+description:
+  required: true
+  alias:
+    - Description
+    - Product Description
+    - Product_Description
+    - Item Description
+    - Item_Description
+    - Style Description
+    - Product Name
+    - Product_Name
+color:
+  required: true
+  alias:
+    - Color
+    - Colour
+    - Color Name
+    - Color_Name
+    - Colour Name
+    - Colour_Name
+    - Shade
+size:
+  required: true
+  alias:
+    - Size
+    - Size Name
+    - Size_Name
+    - Product Size
+    - Product_Size
+    - Item Size
+    - Item_Size
+qty:
+  required: true
+  alias:
+    - Quantity
+    - Qty
+    - Qty Sold
+    - Quantity Sold
+    - Units Sold
+    - Units_Sold
+    - Quantity_Sold
+    - Sold Qty
+rate:
+  required: true
+  alias:
+    - Rate
+    - Unit Price
+    - Unit_Price
+    - Price
+    - Selling Price
+    - Selling_Price
+    - Sale Price
+    - Sale_Price
+amount:
+  required: true
+  alias:
+    - Amount
+    - Total Amount
+    - Total_Amount
+    - Total
+    - Total Sale
+    - Total_Sale
+channel:
+  required: true
+  alias:
+    - Channel
+    - Sales Channel
+    - Sales_Channel
+    - Distribution Channel
+    - Distribution_Channel
