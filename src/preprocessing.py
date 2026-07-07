@@ -62,4 +62,51 @@ class RetailPreprocessor:
             raise ValueError(
                 f"Invalid YAML file: {path}"
             ) from e
-print("YAML configuration loaded successfully.")
+    def load_data(self, filepath: str) -> pd.DataFrame:
+        """
+        Load a dataset from a CSV or Excel file.
+
+        Parameters
+        ----------
+        filepath : str
+            Path to the dataset file.
+
+        Returns
+        -------
+        pd.DataFrame
+            Loaded dataset as a pandas DataFrame.
+        """
+
+        path = Path(filepath)
+
+        if not path.exists():
+            raise FileNotFoundError(
+                f"Dataset file not found: {path}"
+            )
+
+        suffix = path.suffix.lower()
+
+        try:
+            if suffix == ".csv":
+                df = pd.read_csv(path)
+
+            elif suffix in [".xls", ".xlsx"]:
+                df = pd.read_excel(path)
+
+            else:
+                raise ValueError(
+                    f"Unsupported file format: {suffix}. "
+                    "Supported formats are .csv, .xls, and .xlsx."
+                )
+
+        except Exception as e:
+            raise ValueError(
+                f"Failed to load dataset: {e}"
+            ) from e
+
+        if df.empty:
+            raise ValueError("Dataset is empty.")
+
+        self.df = df
+
+        return df
