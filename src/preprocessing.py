@@ -144,3 +144,29 @@ class RetailPreprocessor:
                 raise ValueError(f"No aliases defined for '{standard_name}' in column_mapping.yaml")
         self.column_map = column_map
         return column_map
+    def generate_data_quality_report(self) -> dict[str, Any]:
+        """
+        Generate a data quality report based on the loaded dataset.
+
+        Returns
+        -------
+        dict[str, Any]
+            Data quality report containing information about
+            missing values, duplicates, and data types.
+        """
+        if self.df is None:
+            raise ValueError("Dataframe is not loaded. Call load_data() first.")
+
+        report = {
+            "dataset_info": self.df.info(),
+            "required_columns": {col: col in self.df.columns for col in self.mapping.keys()},
+            "optional_columns": {col: col in self.df.columns for col in self.mapping.keys() if not self.mapping[col].get("required", False)},
+            "missing_values": self.df.isnull().sum().to_dict(),
+            "duplicates": self.df.duplicated().sum(),
+            "date_range": (self.df["date"].min(), self.df["date"].max()) if "date" in self.df.columns else None,
+            "unique_counts": {col: self.df[col].nunique() for col in self.df.columns},
+            "data_types": self.df.dtypes.apply(lambda x: x.name).to_dict(),
+            "ignored_columns": [col for col in self.df.columns if col not in self.column_map.values()],
+        }
+
+        return report
