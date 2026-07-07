@@ -1,6 +1,6 @@
 date:
   required: true
-  alias:
+  aliases:
     - Inv Date
     - Invoice Date
     - Invoice_Date
@@ -24,7 +24,7 @@ date:
     - Invoice Date (YYYY-MM-DD HH:MM:SS)
 store:
   required: true
-  alias:
+  aliases:
     - Store
     - Store Name
     - Store_Name
@@ -38,7 +38,7 @@ store:
     - Shop
 style:
   required: true
-  alias:
+  aliases:
     - Style
     - Style Number
     - Style_Number
@@ -52,7 +52,7 @@ style:
     - SKU Code
 category:
   required: true
-  alias:
+  aliases:
     - Category
     - Category Name
     - Category_Name
@@ -62,7 +62,7 @@ category:
     - Item_Category
 description:
   required: true
-  alias:
+  aliases:
     - Description
     - Product Description
     - Product_Description
@@ -73,7 +73,7 @@ description:
     - Product_Name
 color:
   required: true
-  alias:
+  aliases:
     - Color
     - Colour
     - Color Name
@@ -83,7 +83,7 @@ color:
     - Shade
 size:
   required: true
-  alias:
+  aliases:
     - Size
     - Size Name
     - Size_Name
@@ -93,7 +93,7 @@ size:
     - Item_Size
 qty:
   required: true
-  alias:
+  aliases:
     - Quantity
     - Qty
     - Qty Sold
@@ -104,7 +104,7 @@ qty:
     - Sold Qty
 rate:
   required: true
-  alias:
+  aliases:
     - Rate
     - Unit Price
     - Unit_Price
@@ -115,7 +115,7 @@ rate:
     - Sale_Price
 amount:
   required: true
-  alias:
+  aliases:
     - Amount
     - Total Amount
     - Total_Amount
@@ -124,7 +124,7 @@ amount:
     - Total_Sale
 channel:
   required: true
-  alias:
+  aliases:
     - Channel
     - Sales Channel
     - Sales_Channel

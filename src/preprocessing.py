@@ -110,3 +110,37 @@ class RetailPreprocessor:
         self.df = df
 
         return df
+    def detect_columns(self) -> dict[str, str]:
+        """
+        Detect dataset columns using aliases defined in
+        column_mapping.yaml.
+
+        Returns
+        -------
+        dict[str, str]
+            Mapping between standard column names and
+            dataset column names.
+
+        Raises
+        ------
+        ValueError
+            If a required column cannot be found.
+        """
+        if self.df is None:
+            raise ValueError("Dataframe is not loaded. Call load_data() first.")
+        column_map = {}
+        #loop through every standard field 
+        for standard_name, config in self.mapping.items():
+            aliases = config.get("aliases", [])
+            matched = False 
+            #search every aliases 
+            for alias in aliases:
+                if alias in self.df.columns:
+                    column_map[standard_name] = alias
+                    matched = True
+                    break
+            #required column missing
+            if not aliases:
+                raise ValueError(f"No aliases defined for '{standard_name}' in column_mapping.yaml")
+        self.column_map = column_map
+        return column_map
