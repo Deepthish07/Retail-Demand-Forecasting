@@ -192,3 +192,31 @@ class RetailPreprocessor:
         #Create a renamed copy 
         self.processed_df = self.df.rename(columns=rename_mappings)
         return self.processed_df
+    def remove_empty_columns(self) -> pd.DataFrame:
+        """
+        Remove empty columns such as 'Unnamed: 13'
+        created during Excel export.
+
+        Returns
+        -------
+        pd.DataFrame
+            Dataset without unnamed columns.
+        """
+
+        if self.processed_df is None:
+            raise ValueError(
+                "Processed dataset not found. "
+                "Run rename_columns() first."
+            )
+
+        unnamed_columns = [
+            col
+            for col in self.processed_df.columns
+            if col.startswith("Unnamed")
+        ]
+
+        self.processed_df = self.processed_df.drop(
+            columns=unnamed_columns
+        )
+
+        return self.processed_df
