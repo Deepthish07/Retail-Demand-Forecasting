@@ -122,6 +122,8 @@ amount:
     - Total
     - Total Sale
     - Total_Sale
+    - Net Amount
+    - Net_Amount
 channel:
   required: true
   aliases:
@@ -130,3 +132,12 @@ channel:
     - Sales_Channel
     - Distribution Channel
     - Distribution_Channel
+state:
+  required: true
+  aliases:
+    - State
+    - State Name
+    - State_Name
+    - Region
+    - Region Name
+    - Region_Name

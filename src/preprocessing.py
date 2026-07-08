@@ -172,3 +172,23 @@ class RetailPreprocessor:
         }
 
         return report
+    def rename_columns(self) -> pd.DataFrame:
+        """
+        Rename dataset columns to standard names based on
+        the detected column mapping.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with renamed columns.
+        """
+        if self.df is None:
+            raise ValueError("Dataframe is not loaded. Call load_data() first.")
+        if not self.column_map:
+            raise ValueError("Column mapping is empty. Call detect_columns() first.")
+         # Reverse the mapping:
+        # {"date": "Inv Date"} → {"Inv Date": "date"}
+        rename_mappings={original: standard for standard, original in self.column_map.items()}
+        #Create a renamed copy 
+        self.processed_df = self.df.rename(columns=rename_mappings)
+        return self.processed_df
