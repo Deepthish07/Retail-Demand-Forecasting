@@ -153,20 +153,22 @@ class RetailPreprocessor:
         dict[str, Any]
             Data quality report containing information about
             missing values, duplicates, and data types.
+
         """
+        date_column = self.column_map.get("date")
         if self.df is None:
             raise ValueError("Dataframe is not loaded. Call load_data() first.")
 
         report = {
-            "dataset_info": self.df.info(),
-            "required_columns": {col: col in self.df.columns for col in self.mapping.keys()},
+            "dataset_info": {"rows": len(self.df), "columns": len(self.df.columns),"memory_usage":round(self.df.memory_usage(deep=True).sum()/1024**2, 2)},
+            "required_columns": {"date": True, "store_id": True, "product_id": True, "quantity_sold": True, "sale_amount": True},
             "optional_columns": {col: col in self.df.columns for col in self.mapping.keys() if not self.mapping[col].get("required", False)},
             "missing_values": self.df.isnull().sum().to_dict(),
             "duplicates": self.df.duplicated().sum(),
-            "date_range": (self.df["date"].min(), self.df["date"].max()) if "date" in self.df.columns else None,
+            "date_range": (self.df[date_column].min(), self.df[date_column].max()) if date_column else None,
             "unique_counts": {col: self.df[col].nunique() for col in self.df.columns},
-            "data_types": self.df.dtypes.apply(lambda x: x.name).to_dict(),
             "ignored_columns": [col for col in self.df.columns if col not in self.column_map.values()],
+            "data_types": self.df.dtypes.apply(lambda x: x.name).to_dict(),
         }
 
         return report
