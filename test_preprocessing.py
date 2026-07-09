@@ -4,7 +4,8 @@ preprocessor.load_data("data/raw/one year ebo sale data.xlsx")
 preprocessor.detect_columns()
 preprocessor.rename_columns()
 df=preprocessor.remove_empty_columns()
+df=preprocessor.standardize_text_columns()
 print(df.columns.tolist())
-
-
-
+print(df["color"].unique()[:10])
+print(df["size"].unique()[:10])
+print(df["state"].unique()[:10])

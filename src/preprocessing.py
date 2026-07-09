@@ -220,3 +220,43 @@ class RetailPreprocessor:
         )
 
         return self.processed_df
+    def standardize_text_columns(self) -> pd.DataFrame:
+        """
+        Standardize all text columns by:
+
+        - Removing leading/trailing spaces
+        - Replacing multiple spaces with a single space
+        - Converting text to uppercase
+
+        Returns
+        -------
+        pd.DataFrame
+            Standardized dataset.
+        """
+
+        if self.processed_df is None:
+            raise ValueError(
+                "Processed dataset not found. "
+                "Run rename_columns() first."
+            )
+
+        # Identify text columns
+        text_columns = self.processed_df.select_dtypes(include=["object"]).columns
+
+        for column in text_columns:
+
+            self.processed_df[column] = (
+
+                self.processed_df[column]
+
+                .astype(str)
+
+                .str.strip()
+
+                .str.replace(r"\s+", " ", regex=True)
+
+                .str.upper()
+
+            )
+
+        return self.processed_df
