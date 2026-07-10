@@ -260,3 +260,53 @@ class RetailPreprocessor:
             )
 
         return self.processed_df
+    def convert_data_types(self) -> pd.DataFrame:
+        """
+        Convert dataset columns to the required
+        data types defined in validation_rules.yaml.
+
+        Returns
+        -------
+        pd.DataFrame
+            Dataset with standardized data types.
+        """
+
+        if self.processed_df is None:
+            raise ValueError(
+                "Processed dataset not found. "
+                "Run rename_columns() first."
+            )
+
+        for column, rules in self.validation.items():
+
+            # Skip special sections like required_columns
+            if not isinstance(rules, dict):
+                continue
+
+            if column not in self.processed_df.columns:
+                continue
+
+            datatype = rules.get("datatype")
+
+            if datatype == "datetime":
+
+                self.processed_df[column] = pd.to_datetime(
+                    self.processed_df[column],
+                    errors="coerce"
+                )
+
+            elif datatype == "integer":
+
+                self.processed_df[column] = pd.to_numeric(
+                    self.processed_df[column],
+                    errors="coerce"
+                ).astype("Int64")
+
+            elif datatype == "float":
+
+                self.processed_df[column] = pd.to_numeric(
+                    self.processed_df[column],
+                    errors="coerce"
+                )
+
+        return self.processed_df
