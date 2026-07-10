@@ -1,20 +1,45 @@
 date:
   datatype: datetime
+  required: true
+
+style:
+  datatype: string
+  required: true
+
+store:
+  datatype: string
+  required: true
+
+color:
+  datatype: string
+  required: true
+
+size:
+  datatype: string
+  required: true
+
 qty:
   datatype: integer
-  minimum: 0
+  required: true
+  min: 0
+
 rate:
   datatype: float
-  minimum: 0.0
+  required: false
+  min: 0
+
 amount:
   datatype: float
-  minimum: 0.0
-required_columns:
-  - date
-  - store
-  - style
-  - color
-  - size
-  - qty
-  - rate
-  - amount
+  required: false
+
+channel:
+  datatype: string
+  required: false
+  allowed_values:
+    - EBO
+    - MBO
+    - ECOM
+
+state:
+  datatype: string
+  required: false

@@ -310,3 +310,110 @@ class RetailPreprocessor:
                 )
 
         return self.processed_df
+    def business_validation(self) -> dict[str, Any]:
+        """
+        Validate the processed dataset against business rules
+        defined in validation_rules.yaml.
+
+        Returns
+        -------
+        dict[str, Any]
+            Validation report.
+        """
+
+        if self.processed_df is None:
+            raise ValueError(
+                "Processed dataset not found. "
+                "Run rename_columns() first."
+            )
+
+        validation_summary = {
+            "status": "PASSED",
+            "total_violations": 0,
+            "columns": {}
+        }
+
+        for column, rules in self.validation.items():
+
+            # Skip non-column sections
+            if not isinstance(rules, dict):
+                continue
+
+            # Skip columns not present
+            if column not in self.processed_df.columns:
+                continue
+
+            violations = set()
+
+            # -------------------------------
+            # Required column validation
+            # -------------------------------
+            if rules.get("required", False):
+
+                missing_rows = self.processed_df[
+                    self.processed_df[column].isna()
+                ].index.tolist()
+
+                violations.update(missing_rows)
+
+            # -------------------------------
+            # Minimum value validation
+            # -------------------------------
+            min_value = rules.get("min")
+
+            if min_value is not None:
+
+                invalid_rows = self.processed_df[
+                    self.processed_df[column] < min_value
+                ].index.tolist()
+
+                violations.update(invalid_rows)
+
+            # -------------------------------
+            # Maximum value validation
+            # -------------------------------
+            max_value = rules.get("max")
+
+            if max_value is not None:
+
+                invalid_rows = self.processed_df[
+                    self.processed_df[column] > max_value
+                ].index.tolist()
+
+                violations.update(invalid_rows)
+
+            # -------------------------------
+            # Allowed values validation
+            # -------------------------------
+            allowed_values = rules.get("allowed_values")
+
+            if allowed_values is not None:
+
+                invalid_rows = self.processed_df[
+                    ~self.processed_df[column].isin(allowed_values)
+                ].index.tolist()
+
+                violations.update(invalid_rows)
+
+            # -------------------------------
+            # Future date validation
+            # -------------------------------
+            if column == "date":
+
+                future_rows = self.processed_df[
+                    self.processed_df[column] > pd.Timestamp.today()
+                ].index.tolist()
+
+                violations.update(future_rows)
+
+            validation_summary["columns"][column] = {
+                "count": len(violations),
+                "violations": sorted(list(violations))
+            }
+
+            validation_summary["total_violations"] += len(violations)
+
+        if validation_summary["total_violations"] > 0:
+            validation_summary["status"] = "FAILED"
+
+        return validation_summary

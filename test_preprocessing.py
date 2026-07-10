@@ -5,7 +5,22 @@ preprocessor.detect_columns()
 preprocessor.rename_columns()
 df=preprocessor.remove_empty_columns()
 df=preprocessor.standardize_text_columns()
-print("before convert_data_types", df.dtypes)
 df=preprocessor.convert_data_types()
-print(df.columns.tolist())
-print("After convert_data_types:", df.dtypes)
+validation_report = preprocessor.business_validation()
+
+print("Validation Report")
+
+for column, result in validation_report["columns"].items():
+
+    print(
+        f"{column}: {result['count']} violations"
+    )
+
+print(
+    f"\nTotal Violations: "
+    f"{validation_report['total_violations']}"
+)
+
+print(
+    f"Status: {validation_report['status']}"
+)
