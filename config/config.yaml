@@ -6,6 +6,21 @@ aggregation_level:
   - style
   - color
   - size
+aggregation_rules:
+
+  qty: sum
+
+  amount: sum
+
+  rate: mean
+
+  category: first
+
+  description: first
+
+  state: first
+
+  channel: first
 train_ratio: 0.8
 random_state: 42
 model:

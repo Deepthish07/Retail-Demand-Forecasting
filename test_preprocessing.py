@@ -1,26 +1,21 @@
 from src.preprocessing import RetailPreprocessor
+from pathlib import Path
 preprocessor = RetailPreprocessor()
-preprocessor.load_data("data/raw/one year ebo sale data.xlsx")
+preprocessor.load_data(Path("data/raw/one year ebo sale data.xlsx"))
 preprocessor.detect_columns()
 preprocessor.rename_columns()
 df=preprocessor.remove_empty_columns()
 df=preprocessor.standardize_text_columns()
 df=preprocessor.convert_data_types()
 validation_report = preprocessor.business_validation()
+aggregated_df = preprocessor.aggregate_daily_sales()
 
-print("Validation Report")
+output_path = Path("data/processed")
+output_path.mkdir(parents=True, exist_ok=True)
 
-for column, result in validation_report["columns"].items():
-
-    print(
-        f"{column}: {result['count']} violations"
-    )
-
-print(
-    f"\nTotal Violations: "
-    f"{validation_report['total_violations']}"
+aggregated_df.to_excel(
+    output_path / "aggregated_sales.xlsx",
+    index=False
 )
 
-print(
-    f"Status: {validation_report['status']}"
-)
+print("Aggregated dataset saved successfully.")

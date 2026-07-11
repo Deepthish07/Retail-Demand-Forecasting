@@ -417,3 +417,94 @@ class RetailPreprocessor:
             validation_summary["status"] = "FAILED"
 
         return validation_summary
+    def aggregate_daily_sales(self) -> pd.DataFrame:
+        """
+        Aggregate transactional ERP sales into daily demand.
+
+        The ERP stores one row per barcode transaction.
+        This method converts transactional data into
+        daily sales suitable for forecasting.
+
+        Returns
+        -------
+        pd.DataFrame
+            Daily aggregated sales dataset.
+        """
+
+        if self.processed_df is None:
+            raise ValueError(
+                "Processed dataset not found. "
+                "Run preprocessing before aggregation."
+            )
+
+        # -----------------------------
+        # Read grouping columns
+        # -----------------------------
+        group_columns = self.config.get(
+            "aggregation_level",
+            []
+        )
+
+        if not group_columns:
+            raise ValueError(
+                "aggregation_level not found in config.yaml"
+            )
+
+        # -----------------------------
+        # Validate grouping columns
+        # -----------------------------
+        missing_columns = [
+            column
+            for column in group_columns
+            if column not in self.processed_df.columns
+        ]
+
+        if missing_columns:
+            raise ValueError(
+                f"Missing grouping columns: {missing_columns}"
+            )
+
+        # -----------------------------
+        # Read aggregation rules
+        # -----------------------------
+        aggregation_rules = self.config.get(
+            "aggregation_rules",
+            {}
+        )
+
+        if not aggregation_rules:
+            raise ValueError(
+                "aggregation_rules not found in config.yaml"
+            )
+
+        # -----------------------------
+        # Keep only existing columns
+        # -----------------------------
+        aggregation_rules = {
+            column: rule
+            for column, rule in aggregation_rules.items()
+            if column in self.processed_df.columns
+        }
+
+        # -----------------------------
+        # Aggregate daily sales
+        # -----------------------------
+        self.aggregated_df = (
+            self.processed_df
+            .groupby(
+                group_columns,
+                as_index=False
+            )
+            .agg(aggregation_rules)
+        )
+
+        # -----------------------------
+        # Sort dataset
+        # -----------------------------
+        self.aggregated_df = (
+            self.aggregated_df
+            .sort_values(group_columns)
+            .reset_index(drop=True)
+        )
+
+        return self.aggregated_df
