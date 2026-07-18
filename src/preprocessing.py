@@ -508,3 +508,90 @@ class RetailPreprocessor:
         )
 
         return self.aggregated_df
+    def prepare_modeling_data(
+        self,
+        group_columns: list[str] | None = None
+    ) -> pd.DataFrame:
+        """
+        Prepare modeling dataset at the Store x Style x Date level.
+
+        The detailed aggregated sales data may contain multiple
+        color and size combinations for the same store and style.
+        This method combines them into daily Store x Style demand.
+
+        Parameters
+        ----------
+        group_columns : list[str] | None
+            Columns defining the modeling granularity.
+
+        Returns
+        -------
+        pd.DataFrame
+            Store x Style daily demand dataset.
+        """
+
+        if self.aggregated_df is None:
+            raise ValueError(
+                "Aggregated dataset not found. "
+                "Run aggregate_daily_sales() first."
+            )
+
+        if group_columns is None:
+            group_columns = [
+                "date",
+                "store",
+                "style"
+            ]
+
+        # Validate required columns
+        missing_columns = [
+            column
+            for column in group_columns
+            if column not in self.aggregated_df.columns
+        ]
+
+        if missing_columns:
+            raise ValueError(
+                f"Missing modeling columns: {missing_columns}"
+            )
+
+        # Define aggregation rules
+        aggregation_rules = {
+            "qty": "sum"
+        }
+
+        # Keep useful business dimensions
+        optional_dimensions = {
+            "category": "first",
+            "description": "first",
+            "state": "first",
+            "channel": "first"
+        }
+
+        for column, rule in optional_dimensions.items():
+
+            if column in self.aggregated_df.columns:
+                aggregation_rules[column] = rule
+
+        # Create Store x Style daily dataset
+        modeling_df = (
+            self.aggregated_df
+            .groupby(
+                group_columns,
+                as_index=False
+            )
+            .agg(aggregation_rules)
+        )
+
+        # Sort chronologically
+        modeling_df = (
+            modeling_df
+            .sort_values(
+                ["store", "style", "date"]
+            )
+            .reset_index(drop=True)
+        )
+
+        self.modeling_df = modeling_df
+
+        return self.modeling_df

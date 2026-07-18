@@ -19,3 +19,30 @@ aggregated_df.to_excel(
 )
 
 print("Aggregated dataset saved successfully.")
+modeling_df = preprocessor.prepare_modeling_data()
+
+print(
+    "Detailed Aggregated Shape:",
+    preprocessor.aggregated_df.shape
+)
+
+print(
+    "Modeling Dataset Shape:",
+    modeling_df.shape
+)
+
+state_check = (
+    preprocessor.aggregated_df
+    .groupby("store")["state"]
+    .nunique()
+    .sort_values(ascending=False)
+)
+store_check = (
+    preprocessor.aggregated_df[
+        preprocessor.aggregated_df["store"] == "TBBA - TBF028 - FIVESTAR APPARELS"
+    ][["store", "state"]]
+    .drop_duplicates()
+)
+
+print(store_check)
+print(preprocessor.aggregated_df.columns.tolist())
