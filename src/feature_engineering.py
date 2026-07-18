@@ -544,6 +544,9 @@ class FeatureEngineer:
                 on=["date", "store", "style"],
                 how="left"
             )
+            # Remove unreliable state column
+            if "state" in calendar.columns:
+                calendar = calendar.drop(columns=["state"])
 
             # Fill Qty with zero
             calendar["qty"] = (
@@ -595,3 +598,21 @@ class FeatureEngineer:
         print(f"Added Rows    : {len(self.calendar_df)-len(df):,}")
 
         return self.calendar_df
+    def validate_calendar(self):    
+
+        print("\nValidating Calendar...")
+        print("-" * 40)
+
+        duplicates = self.calendar_df.duplicated(
+            subset=["date", "store", "style"]
+        ).sum()
+
+        print(f"Duplicate rows : {duplicates}")
+
+        missing_qty = self.calendar_df["qty"].isna().sum()
+
+        print(f"Missing Qty : {missing_qty}")
+
+        print(f"Total Rows : {len(self.calendar_df):,}")
+
+        print("Validation Complete")

@@ -13,11 +13,5 @@ calendar_df = (
     .create_complete_calendar()
 )
 
-print("\nOriginal Shape:")
-print(df.shape)
-
-print("\nCalendar Shape:")
-print(calendar_df.shape)
-
-print("\nFirst 20 Rows")
-print(calendar_df.head(20))
+feature_engineer.create_complete_calendar()
+feature_engineer.validate_calendar()
