@@ -458,3 +458,88 @@ class FeatureEngineer:
             )
 
         return pd.DataFrame(results)
+    def create_complete_calendar(self) -> pd.DataFrame:
+        """
+        Create a continuous daily calendar for every
+        Store × Style combination.
+
+        Missing sales days are filled with Qty = 0.
+        """
+
+        required_columns = [
+            "date",
+            "store",
+            "style",
+            "qty"
+        ]
+
+        missing_columns = [
+            column
+            for column in required_columns
+            if column not in self.df.columns
+        ]
+
+        if missing_columns:
+            raise ValueError(
+                f"Missing columns: {missing_columns}"
+            )
+
+        df = self.df.copy()
+
+        df["date"] = pd.to_datetime(df["date"])
+
+        completed_series = []
+
+        grouped = df.groupby(
+            ["store", "style"],
+            sort=False
+        )
+
+        print(
+            f"Creating calendars for {len(grouped)} series..."
+        )
+
+        for (store, style), group in grouped:
+
+            group = group.sort_values("date")
+
+            first_date = group["date"].min()
+            last_date = group["date"].max()
+
+            calendar = pd.DataFrame({
+                "date": pd.date_range(
+                    first_date,
+                    last_date,
+                    freq="D"
+                )
+            })
+
+            calendar["store"] = store
+            calendar["style"] = style
+
+            calendar = calendar.merge(
+                group,
+                on=["date", "store", "style"],
+                how="left"
+            )
+
+            calendar["qty"] = (
+                calendar["qty"]
+                .fillna(0)
+                .astype(int)
+            )
+
+            completed_series.append(calendar)
+
+        self.calendar_df = (
+            pd.concat(
+                completed_series,
+                ignore_index=True
+            )
+            .sort_values(
+                ["store", "style", "date"]
+            )
+            .reset_index(drop=True)
+        )
+
+        return self.calendar_df
