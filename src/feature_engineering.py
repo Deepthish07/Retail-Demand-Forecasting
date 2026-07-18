@@ -1,4 +1,5 @@
 import pandas as pd
+import calendar
 
 
 class FeatureEngineer:
@@ -460,12 +461,21 @@ class FeatureEngineer:
         return pd.DataFrame(results)
     def create_complete_calendar(self) -> pd.DataFrame:
         """
-        Create a continuous daily calendar for every
-        Store × Style combination.
+        Create a continuous daily calendar for every Store × Style series.
 
-        Missing sales days are filled with Qty = 0.
+        Missing sales dates are inserted and Qty is filled with 0.
+        Static attributes (category, description, channel) are
+        forward/backward filled within each series.
+
+        Returns
+        -------
+        pd.DataFrame
+            Continuous daily sales dataset.
         """
 
+        # -------------------------------------------------------
+        # Validate required columns
+        # -------------------------------------------------------
         required_columns = [
             "date",
             "store",
@@ -481,9 +491,12 @@ class FeatureEngineer:
 
         if missing_columns:
             raise ValueError(
-                f"Missing columns: {missing_columns}"
+                f"Missing required columns: {missing_columns}"
             )
 
+        # -------------------------------------------------------
+        # Copy data
+        # -------------------------------------------------------
         df = self.df.copy()
 
         df["date"] = pd.to_datetime(df["date"])
@@ -496,20 +509,28 @@ class FeatureEngineer:
         )
 
         print(
-            f"Creating calendars for {len(grouped)} series..."
+            f"\nCreating calendars for {len(grouped)} Store × Style series..."
         )
 
+        # -------------------------------------------------------
+        # Create calendar for each Store × Style
+        # -------------------------------------------------------
         for (store, style), group in grouped:
 
-            group = group.sort_values("date")
+            group = (
+                group
+                .sort_values("date")
+                .reset_index(drop=True)
+            )
 
             first_date = group["date"].min()
             last_date = group["date"].max()
 
+            # Create continuous date range
             calendar = pd.DataFrame({
                 "date": pd.date_range(
-                    first_date,
-                    last_date,
+                    start=first_date,
+                    end=last_date,
                     freq="D"
                 )
             })
@@ -517,20 +538,45 @@ class FeatureEngineer:
             calendar["store"] = store
             calendar["style"] = style
 
+            # Merge with sales
             calendar = calendar.merge(
                 group,
                 on=["date", "store", "style"],
                 how="left"
             )
 
+            # Fill Qty with zero
             calendar["qty"] = (
                 calendar["qty"]
                 .fillna(0)
                 .astype(int)
             )
 
+            # Fill static attributes
+            static_columns = [
+                "category",
+                "description",
+                "channel"
+            ]
+
+            for column in static_columns:
+
+                if column in calendar.columns:
+
+                    calendar[column] = (
+                        calendar[column]
+                        .ffill()
+                        .bfill()
+                    )
+
+            # Do NOT fill state because it is inconsistent
+            # Keep it as-is for now.
+
             completed_series.append(calendar)
 
+        # -------------------------------------------------------
+        # Combine all Store × Style series
+        # -------------------------------------------------------
         self.calendar_df = (
             pd.concat(
                 completed_series,
@@ -541,5 +587,11 @@ class FeatureEngineer:
             )
             .reset_index(drop=True)
         )
+
+        print("\nCalendar Completion Finished")
+        print("--------------------------------")
+        print(f"Original Rows : {len(df):,}")
+        print(f"Calendar Rows : {len(self.calendar_df):,}")
+        print(f"Added Rows    : {len(self.calendar_df)-len(df):,}")
 
         return self.calendar_df

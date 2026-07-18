@@ -46,6 +46,15 @@ preprocessor.save_dataset(
     modeling_df,
     "modeling_sales_store_style.xlsx"
 )
+print("=" * 60)
+print("CHECKING DUPLICATES")
+print("=" * 60)
+
+duplicate_count = modeling_df.duplicated(
+    subset=["date", "store", "style"]
+).sum()
+
+print(f"Duplicate rows : {duplicate_count}")
 
 # ----------------------------
 # Product Master
@@ -57,6 +66,5 @@ print(product_master.shape)
 
 print("\nFirst 10 Products")
 print(product_master.head(10))
-
 print("\nDuplicate Styles:")
 print(product_master["style"].duplicated().sum())
