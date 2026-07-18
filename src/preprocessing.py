@@ -21,6 +21,7 @@ class RetailPreprocessor:
         self.config = self.load_yaml(config_path)
         self.mapping = self.load_yaml(mapping_path)
         self.validation = self.load_yaml(validation_path)
+        self.product_master = None
 
         self.df = None
         self.column_map = {}
@@ -595,3 +596,160 @@ class RetailPreprocessor:
         self.modeling_df = modeling_df
 
         return self.modeling_df
+    def create_product_master(self) -> pd.DataFrame:
+        """
+        Create Product Master table.
+
+        Product Master stores static information about each style.
+        This prevents repeating category and description in every
+        sales transaction.
+
+        Returns
+        -------
+        pd.DataFrame
+            Product Master dataframe.
+        """
+
+        # ---------------------------------------------
+        # Validation
+        # ---------------------------------------------
+        if self.aggregated_df is None:
+            raise ValueError(
+                "Aggregated dataset not found. "
+                "Run aggregate_daily_sales() first."
+            )
+
+        required_columns = [
+            "style",
+            "category",
+            "description"
+        ]
+
+        missing_columns = [
+            column
+            for column in required_columns
+            if column not in self.aggregated_df.columns
+        ]
+
+        if missing_columns:
+            raise ValueError(
+                f"Missing columns: {missing_columns}"
+            )
+
+        # ---------------------------------------------
+        # Create Product Master
+        # ---------------------------------------------
+        product_master = (
+            self.aggregated_df[
+                required_columns
+            ]
+            .drop_duplicates()
+            .sort_values("style")
+            .reset_index(drop=True)
+        )
+
+        # ---------------------------------------------
+        # Validate uniqueness
+        # ---------------------------------------------
+        duplicate_styles = (
+            product_master["style"]
+            .duplicated()
+            .sum()
+        )
+
+        if duplicate_styles > 0:
+
+            print(
+                "\nWARNING:"
+                f" {duplicate_styles} duplicate styles found."
+            )
+
+            duplicate_data = (
+                product_master[
+                    product_master["style"].duplicated(
+                        keep=False
+                    )
+                ]
+                .sort_values("style")
+            )
+
+            print(duplicate_data)
+
+        else:
+
+            print(
+                "\n✓ Product Master validation passed."
+            )
+
+        self.product_master = product_master
+
+        return self.product_master
+    def save_master_table(
+        self,
+        dataframe: pd.DataFrame,
+        filename: str
+    ) -> None:
+        """
+        Save master table to Excel.
+
+        Parameters
+        ----------
+        dataframe : pd.DataFrame
+            Master table.
+
+        filename : str
+            Output filename.
+        """
+
+        output_path = Path(
+            "data/master"
+        )
+
+        output_path.mkdir(
+            parents=True,
+            exist_ok=True
+        )
+
+        file_path = output_path / filename
+
+        dataframe.to_excel(
+            file_path,
+            index=False
+        )
+
+        print(
+            f"\nMaster table saved:"
+            f" {file_path}"
+        )
+    def save_dataset(
+        self,
+        dataframe: pd.DataFrame,
+        filename: str
+    ) -> None:
+        """
+        Save a dataframe to the processed data folder.
+
+        Parameters
+        ----------
+        dataframe : pd.DataFrame
+            DataFrame to save.
+
+        filename : str
+            Output filename (e.g. aggregated_sales.xlsx)
+        """
+
+        output_dir = Path("data/processed")
+        output_dir.mkdir(
+            parents=True,
+            exist_ok=True
+        )
+
+        output_file = output_dir / filename
+
+        dataframe.to_excel(
+            output_file,
+            index=False
+        )
+
+        print(f"\nDataset saved successfully:")
+        print(output_file)

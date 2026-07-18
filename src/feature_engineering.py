@@ -36,6 +36,7 @@ class FeatureEngineer:
 
         # This will hold the final feature dataset
         self.feature_df = None
+        self.calendar_df = None
 
 
     def create_calendar_features(self) -> pd.DataFrame:
