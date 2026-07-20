@@ -444,7 +444,7 @@ The Streamlit application will allow users to
 
 # 👨‍💻 Author
 
-**Deepthish Raj**
+**Deepthish**
 
 Artificial Intelligence & Data Science
 
