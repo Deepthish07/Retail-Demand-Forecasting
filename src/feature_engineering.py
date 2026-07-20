@@ -616,3 +616,114 @@ class FeatureEngineer:
         print(f"Total Rows : {len(self.calendar_df):,}")
 
         print("Validation Complete")
+    def create_lag_features(
+        self,
+        lags=[1, 7, 14, 28]
+    ):
+        """
+        Create lag features for each Store × Style series.
+
+        Parameters
+        ----------
+        lags : list
+            List of lag periods.
+
+        Returns
+        -------
+        pd.DataFrame
+            Dataset with lag features.
+        """
+
+        # -------------------------------------------------------
+        # Validate
+        # -------------------------------------------------------
+
+        if not hasattr(self, "calendar_df"):
+            raise ValueError(
+                "Run create_complete_calendar() first."
+            )
+
+        # -------------------------------------------------------
+        # Copy calendar
+        # -------------------------------------------------------
+
+        df = self.calendar_df.copy()
+
+        # -------------------------------------------------------
+        # Sort data
+        # -------------------------------------------------------
+
+        df = (
+            df
+            .sort_values(
+                ["store", "style", "date"]
+            )
+            .reset_index(drop=True)
+        )
+
+        # -------------------------------------------------------
+        # Group Store × Style
+        # -------------------------------------------------------
+
+        grouped = df.groupby(
+            ["store", "style"]
+        )
+
+        # -------------------------------------------------------
+        # Create Lag Features
+        # -------------------------------------------------------
+
+        print("\nCreating Lag Features...")
+
+        for lag in lags:
+
+            print(f"Creating lag_{lag}")
+
+            df[f"lag_{lag}"] = (
+                grouped["qty"]
+                .shift(lag)
+            )
+
+        # -------------------------------------------------------
+        # Save
+        # -------------------------------------------------------
+
+        self.feature_df = df
+
+        print("\nLag Feature Creation Completed")
+        print("-----------------------------------")
+        print(f"Shape : {self.feature_df.shape}")
+
+        return self.feature_df
+    def validate_lag_features(self):
+
+        if not hasattr(self, "feature_df"):
+            raise ValueError(
+                "Run create_lag_features() first."
+            )
+
+        print("\nValidating Lag Features...")
+        print("--------------------------------")
+
+        lag_columns = [
+            col
+            for col in self.feature_df.columns
+            if col.startswith("lag_")
+        ]
+
+        print("\nMissing Values")
+
+        for column in lag_columns:
+
+            print(
+                f"{column} : "
+                f"{self.feature_df[column].isna().sum():,}"
+            )
+
+        duplicates = self.feature_df.duplicated(
+            subset=["date", "store", "style"]
+        ).sum()
+
+        print(f"\nDuplicate Rows : {duplicates}")
+
+        print("\nValidation Completed")
