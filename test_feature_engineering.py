@@ -12,7 +12,3 @@ calendar_df = (
     feature_engineer
     .create_complete_calendar()
 )
-
-feature_engineer.create_complete_calendar()
-feature_engineer.validate_calendar()
-feature_engineer.add_calendar_features(calendar_df)
