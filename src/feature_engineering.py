@@ -727,3 +727,73 @@ class FeatureEngineer:
         print(f"\nDuplicate Rows : {duplicates}")
 
         print("\nValidation Completed")
+    def create_rolling_features(
+        self,
+        windows=[7, 14, 28]
+    ):
+        """
+        Create rolling statistical features.
+        """
+
+        if not hasattr(self, "feature_df"):
+            raise ValueError(
+                "Run create_lag_features() first."
+            )
+
+        df = self.feature_df.copy()
+
+        df = (
+            df
+            .sort_values(
+                ["store", "style", "date"]
+            )
+            .reset_index(drop=True)
+        )
+
+        grouped = df.groupby(
+            ["store", "style"]
+        )
+
+        print("\nCreating Rolling Features...")
+
+        for window in windows:
+
+            print(f"Creating rolling_{window}")
+
+            # Rolling Mean
+            df[f"rolling_mean_{window}"] = (
+                grouped["qty"]
+                .transform(
+                    lambda x: x.shift(1)
+                            .rolling(window)
+                            .mean()
+                )
+            )
+
+            # Rolling Sum
+            df[f"rolling_sum_{window}"] = (
+                grouped["qty"]
+                .transform(
+                    lambda x: x.shift(1)
+                            .rolling(window)
+                            .sum()
+                )
+            )
+
+            # Rolling Standard Deviation
+            df[f"rolling_std_{window}"] = (
+                grouped["qty"]
+                .transform(
+                    lambda x: x.shift(1)
+                            .rolling(window)
+                            .std()
+                )
+            )
+
+        self.feature_df = df
+
+        print("\nRolling Feature Creation Completed")
+        print("-------------------------------------")
+        print(f"Shape : {df.shape}")
+
+        return df
