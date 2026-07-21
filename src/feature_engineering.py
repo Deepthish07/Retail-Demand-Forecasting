@@ -797,3 +797,35 @@ class FeatureEngineer:
         print(f"Shape : {df.shape}")
 
         return df
+    def validate_rolling_features(self):
+
+        if not hasattr(self, "feature_df"):
+            raise ValueError(
+                "Run create_rolling_features() first."
+            )
+
+        print("\nValidating Rolling Features...")
+        print("--------------------------------")
+
+        rolling_columns = [
+            col
+            for col in self.feature_df.columns
+            if col.startswith("rolling_")
+        ]
+
+        print("\nMissing Values")
+
+        for column in rolling_columns:
+
+            print(
+                f"{column} : "
+                f"{self.feature_df[column].isna().sum():,}"
+            )
+
+        duplicates = self.feature_df.duplicated(
+            subset=["date", "store", "style"]
+        ).sum()
+
+        print(f"\nDuplicate Rows : {duplicates}")
+
+        print("\nValidation Completed")
