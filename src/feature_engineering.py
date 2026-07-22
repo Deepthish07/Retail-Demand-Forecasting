@@ -1,7 +1,5 @@
 import pandas as pd
 import calendar
-
-
 class FeatureEngineer:
     """
     Handles feature engineering for the
@@ -827,5 +825,100 @@ class FeatureEngineer:
         ).sum()
 
         print(f"\nDuplicate Rows : {duplicates}")
+
+        print("\nValidation Completed")
+    def create_date_features(self):
+        """
+        Create calendar/date-based features.
+        """
+
+        if not hasattr(self, "feature_df"):
+            raise ValueError(
+                "Run create_rolling_features() first."
+            )
+
+        df = self.feature_df.copy()
+
+        print("\nCreating Date Features...")
+
+        # Ensure datetime
+        df["date"] = pd.to_datetime(df["date"])
+
+        # -------------------------
+        # Calendar Features
+        # -------------------------
+
+        df["year"] = df["date"].dt.year
+
+        df["month"] = df["date"].dt.month
+
+        df["quarter"] = df["date"].dt.quarter
+
+        df["week"] = df["date"].dt.isocalendar().week.astype(int)
+
+        df["day"] = df["date"].dt.day
+
+        df["day_of_week"] = df["date"].dt.dayofweek
+
+        df["day_name"] = df["date"].dt.day_name()
+
+        df["is_weekend"] = (
+            df["day_of_week"] >= 5
+        ).astype(int)
+
+        df["is_month_start"] = (
+            df["date"].dt.is_month_start
+        ).astype(int)
+
+        df["is_month_end"] = (
+            df["date"].dt.is_month_end
+        ).astype(int)
+
+        df["is_quarter_start"] = (
+            df["date"].dt.is_quarter_start
+        ).astype(int)
+
+        df["is_quarter_end"] = (
+            df["date"].dt.is_quarter_end
+        ).astype(int)
+
+        self.feature_df = df
+
+        print("\nDate Feature Creation Completed")
+        print("--------------------------------")
+        print(f"Shape : {df.shape}")
+
+        return df
+    def validate_date_features(self):
+
+        if not hasattr(self, "feature_df"):
+            raise ValueError(
+                "Run create_date_features() first."
+            )
+
+        print("\nValidating Date Features")
+        print("----------------------------")
+
+        required = [
+            "year",
+            "month",
+            "quarter",
+            "week",
+            "day",
+            "day_of_week",
+            "day_name",
+            "is_weekend",
+            "is_month_start",
+            "is_month_end",
+            "is_quarter_start",
+            "is_quarter_end"
+        ]
+
+        for column in required:
+
+            print(
+                f"{column:<20} "
+                f"Missing : {self.feature_df[column].isna().sum()}"
+            )
 
         print("\nValidation Completed")

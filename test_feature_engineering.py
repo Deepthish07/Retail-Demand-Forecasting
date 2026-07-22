@@ -18,21 +18,21 @@ feature_df = feature_engineer.create_lag_features()
 
 feature_engineer.validate_lag_features()
 feature_df = feature_engineer.create_rolling_features()
+feature_df = feature_engineer.create_date_features()
 
-feature_engineer.validate_rolling_features()
-sample = feature_df[
-    (feature_df["store"] == "TBBA - TBF028 - FIVESTAR APPARELS") &
-    (feature_df["style"] == "1191")
-]
-
+feature_engineer.validate_date_features()
 print(
-    sample[
+    feature_df[
         [
             "date",
-            "qty",
-            "rolling_mean_7",
-            "rolling_sum_7",
-            "rolling_std_7"
+            "year",
+            "month",
+            "quarter",
+            "week",
+            "day",
+            "day_of_week",
+            "day_name",
+            "is_weekend"
         ]
-    ].head(40)
+    ].head(15)
 )
