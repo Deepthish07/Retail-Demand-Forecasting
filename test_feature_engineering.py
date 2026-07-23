@@ -19,20 +19,10 @@ feature_df = feature_engineer.create_lag_features()
 feature_engineer.validate_lag_features()
 feature_df = feature_engineer.create_rolling_features()
 feature_df = feature_engineer.create_date_features()
+feature_df = feature_engineer.create_business_features()
 
-feature_engineer.validate_date_features()
-print(
-    feature_df[
-        [
-            "date",
-            "year",
-            "month",
-            "quarter",
-            "week",
-            "day",
-            "day_of_week",
-            "day_name",
-            "is_weekend"
-        ]
-    ].head(15)
-)
+feature_engineer.validate_business_features()
+
+print(feature_df.shape)
+
+print(feature_df.columns)

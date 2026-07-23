@@ -922,3 +922,198 @@ class FeatureEngineer:
             )
 
         print("\nValidation Completed")
+    def create_business_features(self):
+        """
+        Create business-level statistical features.
+        """
+
+        if not hasattr(self, "feature_df"):
+            raise ValueError(
+                "Run create_date_features() first."
+            )
+
+        df = self.feature_df.copy()
+
+        print("\nCreating Business Features...")
+
+        # =====================================================
+        # Store Features
+        # =====================================================
+
+        print("Creating Store Features...")
+
+        store_stats = (
+            df.groupby("store")["qty"]
+            .agg(
+                store_avg_sale="mean",
+                store_median_sale="median",
+                store_max_sale="max",
+                store_total_sale="sum"
+            )
+            .reset_index()
+        )
+
+        store_active = (
+            df[df["qty"] > 0]
+            .groupby("store")
+            .size()
+            .reset_index(name="store_active_days")
+        )
+
+        store_stats = store_stats.merge(
+            store_active,
+            on="store",
+            how="left"
+        )
+
+        store_stats["store_active_days"] = (
+            store_stats["store_active_days"]
+            .fillna(0)
+        )
+
+        df = df.merge(
+            store_stats,
+            on="store",
+            how="left"
+        )
+
+        # =====================================================
+        # Style Features
+        # =====================================================
+
+        print("Creating Style Features...")
+
+        style_stats = (
+            df.groupby("style")["qty"]
+            .agg(
+                style_avg_sale="mean",
+                style_median_sale="median",
+                style_max_sale="max",
+                style_total_sale="sum"
+            )
+            .reset_index()
+        )
+
+        style_active = (
+            df[df["qty"] > 0]
+            .groupby("style")
+            .size()
+            .reset_index(name="style_active_days")
+        )
+
+        style_stats = style_stats.merge(
+            style_active,
+            on="style",
+            how="left"
+        )
+
+        style_stats["style_active_days"] = (
+            style_stats["style_active_days"]
+            .fillna(0)
+        )
+
+        df = df.merge(
+            style_stats,
+            on="style",
+            how="left"
+        )
+
+        # =====================================================
+        # Category Features
+        # =====================================================
+
+        print("Creating Category Features...")
+
+        category_stats = (
+            df.groupby("category")["qty"]
+            .agg(
+                category_avg_sale="mean",
+                category_total_sale="sum"
+            )
+            .reset_index()
+        )
+
+        df = df.merge(
+            category_stats,
+            on="category",
+            how="left"
+        )
+
+        # =====================================================
+        # Sales Frequency
+        # =====================================================
+
+        print("Creating Sales Frequency...")
+
+        style_frequency = (
+            df.groupby("style")["qty"]
+            .apply(lambda x: (x > 0).mean())
+            .reset_index(name="style_sales_frequency")
+        )
+
+        df = df.merge(
+            style_frequency,
+            on="style",
+            how="left"
+        )
+
+        # =====================================================
+        # Zero Sale Ratio
+        # =====================================================
+
+        zero_ratio = (
+            df.groupby("style")["qty"]
+            .apply(lambda x: (x == 0).mean())
+            .reset_index(name="style_zero_sale_ratio")
+        )
+
+        df = df.merge(
+            zero_ratio,
+            on="style",
+            how="left"
+        )
+
+        self.feature_df = df
+
+        print("\nBusiness Feature Creation Completed")
+        print("--------------------------------------")
+        print(f"Shape : {df.shape}")
+
+        return df
+    def validate_business_features(self):
+
+        if not hasattr(self, "feature_df"):
+            raise ValueError(
+                "Run create_business_features() first."
+            )
+
+        print("\nValidating Business Features")
+        print("--------------------------------")
+
+        business_columns = [
+            "store_avg_sale",
+            "store_median_sale",
+            "store_max_sale",
+            "store_total_sale",
+            "store_active_days",
+            "style_avg_sale",
+            "style_median_sale",
+            "style_max_sale",
+            "style_total_sale",
+            "style_active_days",
+            "category_avg_sale",
+            "category_total_sale",
+            "style_sales_frequency",
+            "style_zero_sale_ratio"
+        ]
+
+        for col in business_columns:
+            print(f"{col:<30} Missing : {self.feature_df[col].isna().sum()}")
+
+        duplicates = self.feature_df.duplicated(
+            subset=["date", "store", "style"]
+        ).sum()
+
+        print(f"\nDuplicate Rows : {duplicates}")
+
+        print("\nValidation Completed")
